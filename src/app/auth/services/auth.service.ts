@@ -9,14 +9,18 @@ import { rxResource } from '@angular/core/rxjs-interop';
 
 type AuthStatus = 'checking' | 'authenticated' | 'not-authenticated';
 const baseUrl = environment.baseUrl;
-
+interface RegisterPayload {
+  fullName: string;
+  email: string;
+  password: string;
+}
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private _authStatus = signal<AuthStatus>('checking');
   private _user = signal<User | null>(null);
-  private _token = signal<string | null>(null);
+  private _token = signal<string | null>(localStorage.getItem('token'));
 
   private http = inject(HttpClient);
 
@@ -45,6 +49,15 @@ export class AuthService {
       );
   }
 
+  register(registerPayload: RegisterPayload): Observable<boolean> {
+    return this.http
+      .post<AuthResponse>(`${baseUrl}/auth/register`, registerPayload)
+      .pipe(
+        map((response) => this.handleAuthSuccess(response)),
+        catchError((error) => this.handleAuthError(error))
+      );
+  }
+
   checkStatus(): Observable<boolean> {
     const token = localStorage.getItem('token');
 
@@ -53,16 +66,10 @@ export class AuthService {
       return of(false);
     }
 
-    return this.http
-      .get<AuthResponse>(`${baseUrl}/auth/check-status`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .pipe(
-        map((resp) => this.handleAuthSuccess(resp)),
-        catchError((error) => this.handleAuthError(error))
-      );
+    return this.http.get<AuthResponse>(`${baseUrl}/auth/check-status`, {}).pipe(
+      map((resp) => this.handleAuthSuccess(resp)),
+      catchError((error) => this.handleAuthError(error))
+    );
   }
 
   logout() {

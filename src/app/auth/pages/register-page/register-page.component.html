@@ -1,1 +1,104 @@
-<p>register-page works!</p>,
+<form
+  class="gap-3 flex flex-col"
+  [formGroup]="registerForm"
+  (ngSubmit)="onSubmit()"
+>
+  <div>
+    <label
+      class="input"
+      [class.input-error]="formUtils.isValidField(registerForm, 'fullName')"
+    >
+      <fa-icon [icon]="faUser"></fa-icon>
+      <input
+        type="text"
+        required
+        placeholder="Nombre"
+        title="Only letters, numbers or dash"
+        formControlName="fullName"
+      />
+    </label>
+    @if (formUtils.isValidField(registerForm, 'fullName')) {
+    <span class="text-sm text-red-500 mt-1">
+      El campo debe de tener nombre y apellido
+    </span>
+
+    }
+  </div>
+  <div>
+    <label
+      class="input"
+      [class.input-error]="formUtils.isValidField(registerForm, 'email')"
+    >
+      <fa-icon [icon]="faUser"></fa-icon>
+      <input
+        type="text"
+        required
+        placeholder="Email"
+        title="Only letters, numbers or dash"
+        formControlName="email"
+      />
+    </label>
+    @if (formUtils.isValidField(registerForm, 'email')) {
+    <span class="text-sm text-red-500 mt-1">
+      {{ formUtils.getFieldError(registerForm, "email") }}
+    </span>
+
+    }
+  </div>
+
+  <div>
+    <label
+      class="input"
+      [class.input-error]="formUtils.isValidField(registerForm, 'password')"
+    >
+      <fa-icon [icon]="faLock"></fa-icon>
+      <input
+        type="password"
+        required
+        placeholder="Contraseña"
+        title="Only letters, numbers or dash"
+        formControlName="password"
+      />
+    </label>
+    @if (formUtils.isValidField(registerForm, 'password')) {
+    <p class="text-sm text-red-500 mt-1">
+      {{ formUtils.getFieldError(registerForm, "password") }}
+    </p>
+
+    }
+  </div>
+  <div>
+    <label
+      class="input"
+      [class.input-error]="
+        formUtils.isValidField(registerForm, 'confirmPassword')
+      "
+    >
+      <fa-icon [icon]="faLock"></fa-icon>
+      <input
+        type="password"
+        required
+        placeholder="Confirmar Contraseña"
+        title="Only letters, numbers or dash"
+        formControlName="confirmPassword"
+      />
+    </label>
+    @if (formUtils.isValidField(registerForm, 'confirmPassword')) {
+    <p class="text-sm text-red-500 mt-1">
+      {{ formUtils.getFieldError(registerForm, "confirmPassword") }}
+    </p>
+    }
+  </div>
+  @if (registerForm.errors && registerForm.touched) {
+  <span class="text-sm text-red-500"> Las contraseñas no son iguales </span>
+  }
+  <!--  -->
+  @if (hasError()) {
+  <span class="text-sm text-red-500"
+    >Algo salió mal, intenta nuevamente...</span
+  >
+  }
+  <button class="btn btn-secondary" [disabled]="!registerForm.valid">
+    Registarse
+  </button>
+</form>
