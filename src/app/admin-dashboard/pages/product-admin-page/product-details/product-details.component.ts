@@ -81,6 +81,10 @@ export class ProductDetailsComponent implements OnInit {
           .map((tag) => tag.trim()) || [],
     };
 
-    this.productService.updateProduct(productLike);
+    this.productService
+      .updateProduct(this.product().id, productLike)
+      .subscribe((products) => {
+        console.log('Producto Actualizado');
+      });
   }
 }
