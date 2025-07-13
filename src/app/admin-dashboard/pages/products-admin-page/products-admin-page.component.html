@@ -24,5 +24,10 @@
     <option value="50">50</option>
     <option value="100">100</option>
   </select>
+  <div class="flex flex-1 justify-end">
+    <button class="btn btn-primary" routerLink="/admin/products/new">
+      Nuevo Producto
+    </button>
+  </div>
 </div>
 <products-table [products]="productsResource.value()?.products ?? []" />
