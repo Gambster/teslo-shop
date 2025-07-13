@@ -108,12 +108,6 @@
       </button>
     </div>
 
-    <!-- <select class="select select-bordered w-full">
-      <option value="male">Masculino</option>
-      <option value="female">Femenino</option>
-      <option value="unisex">Unisex</option>
-    </select> -->
-
     <!-- Sizes -->
     <div class="grid grid-cols-6 gap-2">
       @for (size of sizes; track size) {
@@ -145,3 +139,9 @@
     <input type="file" class="file-input file-input-bordered w-full mt-4" />
   </div>
 </form>
+
+@if (wasSaved()) {
+<div class="alert alert-success fixed bottom-4 right-4 w-80 animate-fadeIn">
+  <span>Datos Actualizados Correctamente</span>
+</div>
+}
