@@ -11,6 +11,7 @@ export class FormUtils {
   static passwordPattern =
     '^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+])[A-Za-z\\d!@#$%^&*()_+]{6,}$';
   static notOnlySpacesPattern = '^[a-zA-Z0-9]+$';
+  static slugPattern = '^[a-z0-9_]+(?:-[a-z0-9_]+)*$';
 
   static isValidField(form: FormGroup, fieldName: string): boolean | null {
     return (
@@ -43,7 +44,7 @@ export class FormUtils {
     return this.getTextError(errors);
   }
 
-  private static getTextError(errors: ValidationErrors | null): string | null {
+  static getTextError(errors: ValidationErrors | null): string | null {
     errors = errors || {};
     for (const key of Object.keys(errors)) {
       switch (key) {
