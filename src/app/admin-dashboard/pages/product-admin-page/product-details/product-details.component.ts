@@ -4,6 +4,7 @@ import { ProductCarouselComponent } from '@products/components/product-carousel/
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormUtils } from '@utils/form-utils';
 import { FormErorrLabelComponent } from '@shared/components/form-erorr-label/form-erorr-label.component';
+import { ProductsService } from '@products/services/products.service';
 
 @Component({
   selector: 'product-details',
@@ -18,6 +19,7 @@ export class ProductDetailsComponent implements OnInit {
   product = input.required<Product>();
 
   fb = inject(FormBuilder);
+  productService = inject(ProductsService);
 
   productForm = this.fb.group({
     title: ['', [Validators.required]],
@@ -78,5 +80,7 @@ export class ProductDetailsComponent implements OnInit {
           .split(',')
           .map((tag) => tag.trim()) || [],
     };
+
+    this.productService.updateProduct(productLike);
   }
 }
