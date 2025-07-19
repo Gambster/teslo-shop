@@ -1,4 +1,11 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { Product } from '@products/interfaces/products.interface';
 import { ProductCarouselComponent } from '@products/components/product-carousel/product-carousel.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,6 +32,15 @@ export class ProductDetailsComponent implements OnInit {
 
   productService = inject(ProductsService);
   wasSaved = signal<boolean>(false);
+  tempImages = signal<string[]>([]);
+  imageFileList: FileList | undefined;
+
+  carouselImages = computed<string[]>(() => {
+    const productImages = this.product()?.images || [];
+    const temporalImages = this.tempImages() || [];
+
+    return [...productImages, ...temporalImages];
+  });
 
   productForm = this.fb.group({
     title: ['', [Validators.required]],
@@ -88,13 +104,17 @@ export class ProductDetailsComponent implements OnInit {
 
     if (this.product().id === 'new') {
       const product = await firstValueFrom(
-        this.productService.createProduct(productLike)
+        this.productService.createProduct(productLike, this.imageFileList)
       );
 
       this.router.navigate(['/admin/products', product.id]);
     } else {
       await firstValueFrom(
-        this.productService.updateProduct(this.product().id, productLike)
+        this.productService.updateProduct(
+          this.product().id,
+          productLike,
+          this.imageFileList
+        )
       );
     }
 
@@ -103,5 +123,16 @@ export class ProductDetailsComponent implements OnInit {
     setTimeout(() => {
       this.wasSaved.set(false);
     }, 3000);
+  }
+
+  onFilesChanged(event: Event) {
+    const filesList = (event.target as HTMLInputElement).files;
+    this.imageFileList = filesList || undefined;
+
+    const imageUrls = Array.from(filesList || []).map((file) =>
+      URL.createObjectURL(file)
+    );
+
+    this.tempImages.set(imageUrls);
   }
 }

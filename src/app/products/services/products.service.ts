@@ -6,7 +6,7 @@ import {
   Product,
   ProductsResponse,
 } from '@products/interfaces/products.interface';
-import { Observable, of, tap } from 'rxjs';
+import { forkJoin, map, Observable, of, switchMap, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 const baseUrl = environment.baseUrl;
@@ -88,17 +88,42 @@ export class ProductsService {
 
   updateProduct(
     productId: string,
-    productLike: Partial<Product>
+    productLike: Partial<Product>,
+    imageFileList?: FileList
   ): Observable<Product> {
-    return this.http
-      .patch<Product>(`${baseUrl}/products/${productId}`, productLike)
-      .pipe(tap((product) => this.updateProductCache(product)));
+    const currentImages = productLike.images || [];
+
+    return this.uploadImages(imageFileList).pipe(
+      map((imageNames) => ({
+        ...productLike,
+        images: [...currentImages, ...imageNames],
+      })),
+      switchMap((updatedProduct) =>
+        this.http.patch<Product>(
+          `${baseUrl}/products/${productId}`,
+          updatedProduct
+        )
+      ),
+      tap((product) => this.updateProductCache(product))
+    );
   }
 
-  createProduct(productLike: Partial<Product>): Observable<Product> {
-    return this.http
-      .post<Product>(`${baseUrl}/products`, productLike)
-      .pipe(tap((product) => this.updateProductCache(product)));
+  createProduct(
+    productLike: Partial<Product>,
+    imageFileList?: FileList
+  ): Observable<Product> {
+    const currentImages = productLike.images || [];
+
+    return this.uploadImages(imageFileList).pipe(
+      map((imageNames) => ({
+        ...productLike,
+        images: [...currentImages, ...imageNames],
+      })),
+      switchMap((updatedProduct) =>
+        this.http.post<Product>(`${baseUrl}/products`, updatedProduct)
+      ),
+      tap((product) => this.updateProductCache(product))
+    );
   }
 
   updateProductCache(product: Product) {
@@ -111,6 +136,25 @@ export class ProductsService {
           currentProduct.id === productId ? product : currentProduct
       );
     });
-    console.log('Cache Actualizado');
+  }
+
+  uploadImages(images?: FileList): Observable<string[]> {
+    if (!images) return of([]);
+
+    const uploadObservables = Array.from(images).map((imageFile) =>
+      this.uploadImage(imageFile)
+    );
+
+    return forkJoin(uploadObservables);
+  }
+
+  uploadImage(imageFile: File): Observable<string> {
+    const formData = new FormData();
+
+    formData.append('file', imageFile);
+
+    return this.http
+      .post<{ fileName: string }>(`${baseUrl}/files/product`, formData)
+      .pipe(map((response) => response.fileName));
   }
 }
